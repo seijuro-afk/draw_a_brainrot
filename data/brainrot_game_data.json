@@ -1,0 +1,3366 @@
+{
+  "meta": {
+    "version": "1.0",
+    "notes": "4 moves + structured status effects"
+  },
+  "characters": {
+    "Tralalero Tralala": {
+      "rarity": "Legendary",
+      "stats": {
+        "hp": 160,
+        "attack": 38,
+        "defense": 26,
+        "speed": 20
+      },
+      "moves": {
+        "basic": {
+          "name": "Shark Bite",
+          "power": 24,
+          "accuracy": 0.95,
+          "effectText": "Bites the enemy. 20% chance to apply Bleed (2 turns).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Bleed",
+              "chance": 0.2,
+              "duration": 2,
+              "effect": {
+                "stat": "hp",
+                "value": -6,
+                "mode": "per_turn"
+              }
+            }
+          ]
+        },
+        "special": {
+          "name": "Tidal Chomp",
+          "power": 42,
+          "accuracy": 0.95,
+          "effectText": "A brutal chomp. Deals bonus damage if target is Bleeding.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Bleed",
+              "chance": 0.25,
+              "duration": 2,
+              "effect": {
+                "stat": "hp",
+                "value": -6,
+                "mode": "per_turn"
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Fin Flick Evade",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Evades the next attack (60% chance).",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Evade",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "evadeChance": 0.6
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Megalodon Rush",
+          "power": 96,
+          "accuracy": 0.95,
+          "effectText": "Devastating shark rush. Applies Fear (enemy damage -20% for 2 turns).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Fear",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "attack",
+                "value": -0.2,
+                "mode": "percent"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Tung Tung Tung Sahur": {
+      "rarity": "Legendary",
+      "stats": {
+        "hp": 160,
+        "attack": 38,
+        "defense": 26,
+        "speed": 20
+      },
+      "moves": {
+        "basic": {
+          "name": "Bat Bonk",
+          "power": 23,
+          "accuracy": 0.95,
+          "effectText": "Bonks the enemy with a bat."
+        },
+        "special": {
+          "name": "Triple Tung Smash",
+          "power": 38,
+          "accuracy": 0.95,
+          "effectText": "3-hit combo. Each hit has 15% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.15,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Sahur Block",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Blocks the next attack and counters for small damage."
+        },
+        "ultimate": {
+          "name": "Midnight Sahur Slam",
+          "power": 91,
+          "accuracy": 0.95,
+          "effectText": "Huge bat slam. Guaranteed Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Ballerina Cappuccina": {
+      "rarity": "Legendary",
+      "stats": {
+        "hp": 160,
+        "attack": 38,
+        "defense": 26,
+        "speed": 20
+      },
+      "moves": {
+        "basic": {
+          "name": "Pirouette Kick",
+          "power": 19,
+          "accuracy": 0.95,
+          "effectText": "Elegant kick."
+        },
+        "special": {
+          "name": "Spin Slash",
+          "power": 33,
+          "accuracy": 0.95,
+          "effectText": "Graceful spinning strike. 30% chance to Dodge next hit."
+        },
+        "defense": {
+          "name": "Curtain Step",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Evades next attack (55% chance).",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Evade",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "evadeChance": 0.55
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Grand Finale Dance",
+          "power": 80,
+          "accuracy": 0.95,
+          "effectText": "Massive performance attack. Boosts own attack for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "AttackUp",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "attack",
+                "value": 0.25,
+                "mode": "percent"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Brr Brr Patapim": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Bombardilo Crocodilo": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Croc Snap",
+          "power": 19,
+          "accuracy": 0.95,
+          "effectText": "Quick bite. 15% chance to Bleed (2 turns).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Bleed",
+              "chance": 0.15,
+              "duration": 2,
+              "effect": {
+                "stat": "hp",
+                "value": -6,
+                "mode": "per_turn"
+              }
+            }
+          ]
+        },
+        "special": {
+          "name": "Swamp Roll",
+          "power": 33,
+          "accuracy": 0.95,
+          "effectText": "Death roll attack. Ignores 30% defense."
+        },
+        "defense": {
+          "name": "Scale Armor",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces damage taken by 40% for 2 turns."
+        },
+        "ultimate": {
+          "name": "Bombardment Roll",
+          "power": 78,
+          "accuracy": 0.95,
+          "effectText": "Explosive roll. Deals AoE damage (if multi-enemy)."
+        }
+      }
+    },
+    "Cappuccino Assassino": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Hot Espresso Shot",
+          "power": 17,
+          "accuracy": 0.95,
+          "effectText": "Scalding coffee attack."
+        },
+        "special": {
+          "name": "Latte Whirl",
+          "power": 29,
+          "accuracy": 0.95,
+          "effectText": "Spins coffee foam, reducing enemy accuracy (2 turns)."
+        },
+        "defense": {
+          "name": "Foam Shield",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Absorbs 35 damage.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Shield",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "shield": 35
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Caffeine Overdrive",
+          "power": 70,
+          "accuracy": 0.95,
+          "effectText": "Massive burst. Increases own speed (extra turn chance) for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "SpeedUp",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "speed",
+                "value": 0.25,
+                "mode": "percent"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Lirili Larila": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Garama and Madungdung": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Los Tralaleritos": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Chicleteira Bicicleteira": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Trippi Troppi": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Chimpanzini Bananini": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Banana Toss",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Throws a banana. 25% chance to Blind (1 turn)."
+        },
+        "special": {
+          "name": "Primal Screech",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Reduces enemy attack by 25% (2 turns)."
+        },
+        "defense": {
+          "name": "Monkey Reflex",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Evades next attack (50% chance).",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Evade",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "evadeChance": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Banana Stampede",
+          "power": 64,
+          "accuracy": 0.95,
+          "effectText": "Chaos rush. Hits 2-4 times randomly."
+        }
+      }
+    },
+    "Esok Sekolah": {
+      "rarity": "Epic",
+      "stats": {
+        "hp": 130,
+        "attack": 30,
+        "defense": 20,
+        "speed": 18
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 14,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 26,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 58,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "67": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "67 Punch",
+          "power": 13,
+          "accuracy": 0.95,
+          "effectText": "A mysterious numbered punch."
+        },
+        "special": {
+          "name": "Glitch Combo",
+          "power": 23,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and has 30% chance to Confuse (2 turns).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 0.3,
+              "duration": 2,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Error Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Negates next hit and restores 10 HP.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Heal",
+              "chance": 1.0,
+              "duration": 0,
+              "effect": {
+                "heal": 10
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Blue Screen Doom",
+          "power": 56,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 20% chance to Stun and Confuse.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.2,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            },
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Boneca Ambalabu": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Pot Hotspot": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "WiFi Zap",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Electric signal shock."
+        },
+        "special": {
+          "name": "Lag Spike",
+          "power": 20,
+          "accuracy": 0.95,
+          "effectText": "Applies Slow (enemy acts last) for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Slow",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "speed",
+                "value": -0.3,
+                "mode": "percent"
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Signal Shield",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Blocks next debuff.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DebuffShield",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "blockDebuff": true
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Full Disconnect",
+          "power": 50,
+          "accuracy": 0.95,
+          "effectText": "Big damage. Silences enemy specials for 1 turn.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Silence",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "disableMoves": [
+                  "special"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Trulimero Trulicina": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Bombombini Gusini": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Job Job Job Sahur": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "U Din Din Din Din Dun Ma Din Din Din Dun": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Orcalero Orcala": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Noobini Pizzanini": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "La Vacca Saturno Saturnita": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Frigo Camelo": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Pakrahmatmamat": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Cocofanto Elefanto": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Graipuss Medussi": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 95,
+        "attack": 20,
+        "defense": 13,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Las Tralaleritas": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "La Grande Combinasion": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Nuclearo Dinossauro": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Bisonte Giuppitere": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Ta Ta Ta Sahur": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Bobrito Bandito": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 12,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 22,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 48,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Ballerino Lololo": {
+      "rarity": "Rare",
+      "stats": {
+        "hp": 110,
+        "attack": 24,
+        "defense": 16,
+        "speed": 16
+      },
+      "moves": {
+        "basic": {
+          "name": "Pirouette Kick",
+          "power": 13,
+          "accuracy": 0.95,
+          "effectText": "Elegant kick."
+        },
+        "special": {
+          "name": "Spin Slash",
+          "power": 23,
+          "accuracy": 0.95,
+          "effectText": "Graceful spinning strike. 30% chance to Dodge next hit."
+        },
+        "defense": {
+          "name": "Curtain Step",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Evades next attack (55% chance).",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "Evade",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "evadeChance": 0.55
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Grand Finale Dance",
+          "power": 55,
+          "accuracy": 0.95,
+          "effectText": "Massive performance attack. Boosts own attack for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "AttackUp",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "attack",
+                "value": 0.25,
+                "mode": "percent"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Burbaloni Luliloli": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Piccione Macchina": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Špijuniro Golubiro": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Nooo My Hotspot": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "WiFi Zap",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Electric signal shock."
+        },
+        "special": {
+          "name": "Lag Spike",
+          "power": 17,
+          "accuracy": 0.95,
+          "effectText": "Applies Slow (enemy acts last) for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Slow",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "speed",
+                "value": -0.3,
+                "mode": "percent"
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Signal Shield",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Blocks next debuff.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DebuffShield",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "blockDebuff": true
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Full Disconnect",
+          "power": 42,
+          "accuracy": 0.95,
+          "effectText": "Big damage. Silences enemy specials for 1 turn.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Silence",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "disableMoves": [
+                  "special"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Glorbo Fruttodrillo": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Bulbito Bandito": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 95,
+        "attack": 20,
+        "defense": 13,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Frulli Frulla": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Te Te Te Sahur": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Ti Ti Ti Sahur": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Celularcini Viciosini": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "WiFi Zap",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Electric signal shock."
+        },
+        "special": {
+          "name": "Lag Spike",
+          "power": 17,
+          "accuracy": 0.95,
+          "effectText": "Applies Slow (enemy acts last) for 2 turns.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Slow",
+              "chance": 1.0,
+              "duration": 2,
+              "effect": {
+                "stat": "speed",
+                "value": -0.3,
+                "mode": "percent"
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Signal Shield",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Blocks next debuff.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DebuffShield",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "blockDebuff": true
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Full Disconnect",
+          "power": 42,
+          "accuracy": 0.95,
+          "effectText": "Big damage. Silences enemy specials for 1 turn.",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Silence",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "disableMoves": [
+                  "special"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Los Matteos": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Pipi Kiwi": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Tob Tobi Tob Tob Tobi Tob": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Tigroligre Frutonni": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Mastodontico Telepiedone": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    },
+    "Canneloni Dragoni": {
+      "rarity": "Common",
+      "stats": {
+        "hp": 90,
+        "attack": 18,
+        "defense": 12,
+        "speed": 14
+      },
+      "moves": {
+        "basic": {
+          "name": "Meme Jab",
+          "power": 10,
+          "accuracy": 0.95,
+          "effectText": "Quick hit."
+        },
+        "special": {
+          "name": "Brainrot Blast",
+          "power": 18,
+          "accuracy": 0.95,
+          "effectText": "Deals damage and applies Confuse (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Confuse",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "missChance": 0.35
+              }
+            }
+          ]
+        },
+        "defense": {
+          "name": "Cringe Guard",
+          "power": 0,
+          "accuracy": 1.0,
+          "effectText": "Reduces incoming damage by 50% this turn.",
+          "statusEffects": [
+            {
+              "type": "buff",
+              "name": "DamageReduction",
+              "chance": 1.0,
+              "duration": 1,
+              "effect": {
+                "damageTakenMultiplier": 0.5
+              }
+            }
+          ]
+        },
+        "ultimate": {
+          "name": "Absolute Brainrot",
+          "power": 40,
+          "accuracy": 0.95,
+          "effectText": "Massive damage. 25% chance to Stun (1 turn).",
+          "statusEffects": [
+            {
+              "type": "debuff",
+              "name": "Stun",
+              "chance": 0.25,
+              "duration": 1,
+              "effect": {
+                "skipTurn": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

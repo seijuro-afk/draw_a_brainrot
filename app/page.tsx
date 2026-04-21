@@ -8,23 +8,88 @@ import Image from "next/image";
 // ── Types ──────────────────────────────────────────────────────────────────
 type Card = { name: string; rarity: string; image: string };
 type OwnedCard = Card & { stats: CardStats; id: string; stars: number };
-type Tab = "draw" | "collection" | "inventory" | "refinery";
+type Tab = "packs" | "collection" | "battle" | "inventory" | "refinery";
+type BannerType = "regular" | "deluxe";
 
-// ── Constants ──────────────────────────────────────────────────────────────
+type ItemRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
+type Item = {
+  id: string;
+  name: string;
+  icon: string;
+  rarity: ItemRarity;
+  description: string;
+  quantity: number;
+};
+
+type BattleResult = {
+  winner: "player" | "enemy";
+  drops: Item[];
+  shardsEarned: number;
+  log: string[];
+};
+
+// ── Pull Rates ─────────────────────────────────────────────────────────────
+// Regular banner — low Epic/Legendary odds, pity at 500
+const REGULAR_RATES = { Common: 70, Rare: 24.7, Epic: 4.5, Legendary: 0.8 };
+const REGULAR_PITY = 500;
+
+// Deluxe banner — higher odds, costs Brainrot Shards
+const DELUXE_RATES  = { Common: 55, Rare: 30,   Epic: 11,  Legendary: 4   };
+const DELUXE_1_COST  = 100;   // shards per single pull
+const DELUXE_10_COST = 1000;  // shards per 10-pull
+
+// Battle shard reward range
+const SHARD_WIN_MIN  = 20;
+const SHARD_WIN_MAX  = 25;
+const SHARD_LOSS     = 5;     // small consolation
+
+// ── Item Pool ──────────────────────────────────────────────────────────────
+const ITEM_POOL: Omit<Item, "id" | "quantity">[] = [
+  { name: "Sigma Stone",        icon: "💎", rarity: "Legendary", description: "Crystallized sigma energy. Very rare." },
+  { name: "Rizz Elixir",        icon: "🧪", rarity: "Epic",      description: "Bottled rizz. Smells expensive." },
+  { name: "Brainrot Shard",     icon: "🪨", rarity: "Rare",      description: "A fragment of pure brainrot." },
+  { name: "NPC Dust",           icon: "✨", rarity: "Uncommon",  description: "Swept from defeated NPCs." },
+  { name: "Skibidi Token",      icon: "🪙", rarity: "Common",    description: "Minted from toilet vibes." },
+  { name: "Aura Fragment",      icon: "🌀", rarity: "Rare",      description: "A piece of someone's lost aura." },
+  { name: "Gyatt Gem",          icon: "💜", rarity: "Epic",      description: "Don't ask where this came from." },
+  { name: "Mewing Scroll",      icon: "📜", rarity: "Uncommon",  description: "Ancient mewing techniques." },
+  { name: "Fanum Tax Receipt",  icon: "🧾", rarity: "Common",    description: "Proof of food confiscation." },
+  { name: "W Key",              icon: "🗝️", rarity: "Legendary", description: "The rarest key. Only winners hold it." },
+];
+
+const ITEM_RARITY_WEIGHTS: Record<ItemRarity, number> = {
+  Common: 50, Uncommon: 25, Rare: 15, Epic: 8, Legendary: 2,
+};
+
+const ITEM_RARITY_STYLE: Record<ItemRarity, string> = {
+  Common:    "bg-zinc-700 text-zinc-200",
+  Uncommon:  "bg-green-900 text-green-200",
+  Rare:      "bg-blue-900 text-blue-200",
+  Epic:      "bg-purple-900 text-purple-200",
+  Legendary: "bg-amber-900 text-amber-200",
+};
+
+const ITEM_RARITY_BORDER: Record<ItemRarity, string> = {
+  Common:    "border-zinc-700",
+  Uncommon:  "border-green-700",
+  Rare:      "border-blue-700",
+  Epic:      "border-purple-600",
+  Legendary: "border-amber-500",
+};
+
+// ── Card Style Maps ────────────────────────────────────────────────────────
 const RARITY_STYLE: Record<string, string> = {
   Common:    "bg-zinc-700 text-zinc-200",
   Rare:      "bg-blue-900 text-blue-200",
   Epic:      "bg-purple-900 text-purple-200",
   Legendary: "bg-amber-900 text-amber-200",
 };
-
 const RARITY_BORDER: Record<string, string> = {
   Common:    "border-zinc-700",
   Rare:      "border-blue-700",
   Epic:      "border-purple-600",
   Legendary: "border-amber-500",
 };
-
 const RARITY_GLOW: Record<string, string> = {
   Common:    "",
   Rare:      "shadow-[0_0_18px_2px_rgba(59,130,246,0.25)]",
@@ -39,14 +104,15 @@ const STATS_CONFIG = [
   { key: "npcEnergy",     label: "NPC Energy",      color: "bg-blue-500" },
 ] as const;
 
-const COOLDOWN_MS = 0 * 60 * 1000;
-const UPGRADE_COST = 10; // brainrot cards to upgrade 1 star
+const UPGRADE_COST = 10;
+const COOLDOWN_MS  = 60 * 1000; // 1 minute
 
 const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
-  { tab: "draw",       label: "Draw Card",  icon: "🃏" },
+  { tab: "packs",      label: "Packs",      icon: "📦" },
   { tab: "collection", label: "Collection", icon: "📖" },
-  { tab: "inventory",  label: "Inventory",  icon: "🎒" },
-  { tab: "refinery",   label: "Refinery",   icon: "⚗️" },
+  { tab: "battle",     label: "Battle",     icon: "⚔️"  },
+  { tab: "inventory",  label: "Inventory",  icon: "🎒"  },
+  { tab: "refinery",   label: "Refinery",   icon: "⚗️"  },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -55,343 +121,674 @@ function uid() {
 }
 
 function formatTime(ms: number) {
-  const totalSeconds = Math.ceil(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
+/** Roll a single card rarity given a rate table. Forces pity rarity if pityForced is set. */
+function rollRarity(
+  rates: Record<string, number>,
+  pityCount: number,
+  pityThreshold: number,
+): string {
+  if (pityCount >= pityThreshold - 1) return "Epic"; // pity guarantee: at least Epic
+
+  const total = Object.values(rates).reduce((a, b) => a + b, 0);
+  let roll   = Math.random() * total;
+  for (const [r, w] of Object.entries(rates)) {
+    roll -= w;
+    if (roll <= 0) return r;
+  }
+  return "Common";
+}
+
+function pickCard(rarity: string): Card {
+  const pool = (cards as Card[]).filter((c) => c.rarity === rarity);
+  const src  = pool.length > 0 ? pool : (cards as Card[]);
+  return src[Math.floor(Math.random() * src.length)];
+}
+
+function makeOwned(c: Card): OwnedCard {
+  return { ...c, stats: generateStats(c.name, c.rarity), id: uid(), stars: 1 };
+}
+
+function weightedRandomItem(): Omit<Item, "id" | "quantity"> {
+  const byRarity: Record<ItemRarity, typeof ITEM_POOL> = {
+    Common: [], Uncommon: [], Rare: [], Epic: [], Legendary: [],
+  };
+  ITEM_POOL.forEach((i) => byRarity[i.rarity].push(i));
+  const total = Object.values(ITEM_RARITY_WEIGHTS).reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  for (const r of ["Common", "Uncommon", "Rare", "Epic", "Legendary"] as ItemRarity[]) {
+    roll -= ITEM_RARITY_WEIGHTS[r];
+    if (roll <= 0) {
+      const choices = byRarity[r];
+      return choices[Math.floor(Math.random() * choices.length)];
+    }
+  }
+  return ITEM_POOL[0];
+}
+
+function rollDrops(count: number): Item[] {
+  return Array.from({ length: count }, () => ({
+    ...weightedRandomItem(), id: uid(), quantity: 1,
+  }));
+}
+
+function cardPower(c: OwnedCard): number {
+  const s = c.stats;
+  return Math.round((s.brainrotPower + s.rizz + s.sigmaAura + s.npcEnergy) * (1 + (c.stars - 1) * 0.15));
+}
+
+// ── Shared UI ──────────────────────────────────────────────────────────────
 function StarRow({ count, max = 5 }: { count: number; max?: number }) {
   return (
     <div className="flex gap-0.5">
       {Array.from({ length: max }).map((_, i) => (
-        <span
-          key={i}
-          className={`text-xs ${i < count ? "text-amber-400" : "text-zinc-700"}`}
-        >
-          ★
-        </span>
+        <span key={i} className={`text-xs ${i < count ? "text-amber-400" : "text-zinc-700"}`}>★</span>
       ))}
     </div>
   );
 }
 
-// ── Sub-components ─────────────────────────────────────────────────────────
-function CardDisplay({
-  card,
-  stars,
-  flipping,
-  stats,
-}: {
-  card: OwnedCard | null;
-  stars?: number;
-  flipping: boolean;
-  stats: CardStats | null;
-}) {
+function MiniCard({ c }: { c: OwnedCard }) {
   return (
-    <div
-      className={`w-64 rounded-2xl border-2 bg-zinc-900 p-5 flex flex-col items-center gap-4 transition-all duration-300
-        ${card ? RARITY_BORDER[card.rarity] ?? "border-zinc-700" : "border-zinc-800"}
-        ${card ? RARITY_GLOW[card.rarity] ?? "" : ""}
-        ${flipping ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}
-    >
-      {card ? (
-        <>
-          <div className="relative w-44 h-44 rounded-xl overflow-hidden bg-zinc-800">
-            <Image
-              src={card.image}
-              alt={card.name}
-              fill
-              sizes="176px"
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-
-          <div className="flex flex-col items-center gap-1 w-full">
-            <span
-              className={`text-xs px-3 py-0.5 rounded-full font-medium ${
-                RARITY_STYLE[card.rarity] ?? "bg-zinc-700 text-zinc-300"
-              }`}
-            >
-              {card.rarity}
-            </span>
-            <p className="font-semibold text-center text-base mt-1">{card.name}</p>
-            {stars !== undefined && <StarRow count={stars} />}
-          </div>
-
-          {stats && (
-            <div className="w-full space-y-2">
-              {STATS_CONFIG.map(({ key, label, color }) => (
-                <div key={key}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-zinc-400">{label}</span>
-                    <span className="font-medium">{stats[key]}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${color} rounded-full transition-all duration-700`}
-                      style={{ width: `${stats[key]}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <p className="text-zinc-500 italic text-xs pt-3 border-t border-white/10 text-center">
-                {stats.ability}
-              </p>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex flex-col items-center gap-3 py-10 text-zinc-600">
-          <span style={{ fontSize: 48 }}>🃏</span>
-          <p className="text-sm">Hit draw to summon a card</p>
-        </div>
-      )}
+    <div className={`rounded-xl border-2 bg-zinc-900 p-2 flex flex-col items-center gap-1.5 ${RARITY_BORDER[c.rarity] ?? "border-zinc-700"} ${RARITY_GLOW[c.rarity] ?? ""}`}>
+      <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-zinc-800">
+        <Image src={c.image} alt={c.name} fill sizes="100px" style={{ objectFit: "cover" }} />
+      </div>
+      <p className="text-xs font-semibold text-center leading-tight w-full truncate">{c.name}</p>
+      <StarRow count={c.stars} />
+      <span className={`text-xs px-1.5 py-0.5 rounded-full ${RARITY_STYLE[c.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>{c.rarity}</span>
     </div>
   );
 }
 
-// ── Tabs ───────────────────────────────────────────────────────────────────
-function DrawTab({
-  inventory,
-  onDraw,
+function ShardBadge({ shards }: { shards: number }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold bg-zinc-800 text-amber-300 px-2 py-0.5 rounded-full border border-amber-800">
+      🪨 {shards.toLocaleString()}
+    </span>
+  );
+}
+
+// ── Reveal overlay for pulled cards ───────────────────────────────────────
+function RevealGrid({
+  drawnCards,
+  revealed,
+  kept,
+  onToggle,
+  onKeep,
+  onDiscard,
 }: {
-  inventory: OwnedCard[];
-  onDraw: (card: OwnedCard) => void;
+  drawnCards: OwnedCard[];
+  revealed: boolean[];
+  kept: boolean[];
+  onToggle: (i: number) => void;
+  onKeep: () => void;
+  onDiscard: () => void;
 }) {
-  const [card, setCard] = useState<OwnedCard | null>(null);
-  const [stats, setStats] = useState<CardStats | null>(null);
-  const [flipping, setFlipping] = useState(false);
+  const keptCount = kept.filter(Boolean).length;
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-zinc-400 text-center">Tap cards to keep them</p>
+      <div className={`grid gap-3 ${drawnCards.length <= 1 ? "grid-cols-1 max-w-[160px] mx-auto" : drawnCards.length <= 3 ? "grid-cols-3" : "grid-cols-5"}`}>
+        {drawnCards.map((c, i) => (
+          <button
+            key={c.id}
+            onClick={() => revealed[i] && onToggle(i)}
+            className={`rounded-xl border-2 transition-all duration-300 overflow-hidden
+              ${!revealed[i] ? "bg-zinc-800 border-zinc-700"
+                : kept[i]
+                  ? (RARITY_BORDER[c.rarity] ?? "border-zinc-700") + " " + (RARITY_GLOW[c.rarity] ?? "") + " scale-105"
+                  : "border-zinc-700 bg-zinc-900 opacity-60"
+              }`}
+            style={{ aspectRatio: "3/4" }}
+          >
+            {!revealed[i] ? (
+              <div className="w-full h-full flex items-center justify-center text-3xl bg-zinc-800">🃏</div>
+            ) : (
+              <div className="flex flex-col items-center gap-1 p-2 h-full">
+                <div className="relative w-full flex-1 rounded-lg overflow-hidden bg-zinc-800">
+                  <Image src={c.image} alt={c.name} fill sizes="80px" style={{ objectFit: "cover" }} />
+                </div>
+                <p className="text-xs font-semibold text-center leading-tight w-full truncate">{c.name}</p>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${RARITY_STYLE[c.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>{c.rarity}</span>
+                {kept[i] && <span className="text-xs text-green-400 font-bold">✓</span>}
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <button
+          onClick={onKeep}
+          disabled={keptCount === 0}
+          className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all
+            ${keptCount > 0 ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+        >
+          Keep {keptCount > 0 ? `${keptCount} card${keptCount !== 1 ? "s" : ""}` : "selected"}
+        </button>
+        <button
+          onClick={onDiscard}
+          className="px-4 py-3 rounded-xl text-sm text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-600 transition-all"
+        >
+          Discard all
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Packs Tab ──────────────────────────────────────────────────────────────
+function PacksTab({
+  shards,
+  regularPity,
+  onKeepCards,
+  onSpendShards,
+  onRegularPull,
+}: {
+  shards: number;
+  regularPity: number;
+  onKeepCards: (c: OwnedCard[]) => void;
+  onSpendShards: (n: number) => void;
+  onRegularPull: (newPity: number) => void;
+}) {
+  const [banner, setBanner] = useState<BannerType>("regular");
+  const [phase, setPhase]   = useState<"select" | "reveal">("select");
+  const [drawnCards, setDrawnCards]   = useState<OwnedCard[]>([]);
+  const [revealed, setRevealed]       = useState<boolean[]>([]);
+  const [kept, setKept]               = useState<boolean[]>([]);
+
+  // Cooldown state (regular only)
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [justDrawn, setJustDrawn] = useState(false);
+  const [timeLeft, setTimeLeft]           = useState(0);
 
   useEffect(() => {
-    const saved = localStorage.getItem("cooldownUntil");
+    const saved = localStorage.getItem("regularCooldown");
     if (saved) {
       const until = Number(saved);
       if (until > Date.now()) setCooldownUntil(until);
-      else localStorage.removeItem("cooldownUntil");
+      else localStorage.removeItem("regularCooldown");
     }
   }, []);
 
   useEffect(() => {
     if (!cooldownUntil) return;
-    const interval = setInterval(() => {
-      const remaining = cooldownUntil - Date.now();
-      if (remaining <= 0) {
-        setCooldownUntil(null);
-        setTimeLeft(0);
-        localStorage.removeItem("cooldownUntil");
-      } else {
-        setTimeLeft(remaining);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
+    const iv = setInterval(() => {
+      const rem = cooldownUntil - Date.now();
+      if (rem <= 0) { setCooldownUntil(null); setTimeLeft(0); localStorage.removeItem("regularCooldown"); }
+      else setTimeLeft(rem);
+    }, 500);
+    return () => clearInterval(iv);
   }, [cooldownUntil]);
 
-  function draw() {
-    if (cooldownUntil && cooldownUntil > Date.now()) return;
-    setFlipping(true);
-    setJustDrawn(false);
-    setTimeout(() => {
-      const picked = cards[Math.floor(Math.random() * cards.length)] as Card;
-      const s = generateStats(picked.name, picked.rarity);
-      const newCard: OwnedCard = { ...picked, stats: s, id: uid(), stars: 1 };
-      setCard(newCard);
-      setStats(s);
-      setFlipping(false);
-      setJustDrawn(true);
-      const until = Date.now() + COOLDOWN_MS;
-      setCooldownUntil(until);
-      localStorage.setItem("cooldownUntil", until.toString());
-    }, 300);
+  const isCooldown = !!(cooldownUntil && cooldownUntil > Date.now());
+
+  function reveal(result: OwnedCard[]) {
+    setDrawnCards(result);
+    setRevealed(Array(result.length).fill(false));
+    setKept(Array(result.length).fill(false));
+    setPhase("reveal");
+    result.forEach((_, i) => {
+      setTimeout(() => {
+        setRevealed((prev) => { const n = [...prev]; n[i] = true; return n; });
+      }, i * 380 + 250);
+    });
   }
 
-  const isCooldown = cooldownUntil !== null && cooldownUntil > Date.now();
+  function pullRegular() {
+    if (isCooldown) return;
+    const newPity = regularPity + 1;
+    const rarity  = rollRarity(REGULAR_RATES, newPity - 1, REGULAR_PITY);
+    const card    = makeOwned(pickCard(rarity));
+    onRegularPull(newPity >= REGULAR_PITY ? 0 : newPity);
+    const until = Date.now() + COOLDOWN_MS;
+    setCooldownUntil(until);
+    localStorage.setItem("regularCooldown", String(until));
+    reveal([card]);
+  }
+
+  function pullDeluxe(count: 1 | 10) {
+    const cost = count === 1 ? DELUXE_1_COST : DELUXE_10_COST;
+    if (shards < cost) return;
+    onSpendShards(cost);
+    const result: OwnedCard[] = [];
+    for (let i = 0; i < count; i++) {
+      const rarity = rollRarity(DELUXE_RATES, 0, 9999); // no separate pity for deluxe
+      result.push(makeOwned(pickCard(rarity)));
+    }
+    reveal(result);
+  }
+
+  function handleToggle(i: number) {
+    setKept((prev) => { const n = [...prev]; n[i] = !n[i]; return n; });
+  }
 
   function handleKeep() {
-    if (!card) return;
-    onDraw(card);
-    setJustDrawn(false);
+    const toKeep = drawnCards.filter((_, i) => kept[i]);
+    if (toKeep.length > 0) onKeepCards(toKeep);
+    setPhase("select");
+  }
+
+  if (phase === "reveal") {
+    return (
+      <RevealGrid
+        drawnCards={drawnCards}
+        revealed={revealed}
+        kept={kept}
+        onToggle={handleToggle}
+        onKeep={handleKeep}
+        onDiscard={() => setPhase("select")}
+      />
+    );
   }
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <CardDisplay card={card} stars={card?.stars} flipping={flipping} stats={stats} />
-
-      {isCooldown && (
-        <p className="text-sm text-zinc-400">
-          Cooldown: <span className="font-semibold">{formatTime(timeLeft)}</span>
-        </p>
-      )}
-
-      <div className="flex gap-3">
+    <div className="space-y-6">
+      {/* Banner toggle */}
+      <div className="flex rounded-xl overflow-hidden border border-zinc-800">
         <button
-          onClick={draw}
-          disabled={isCooldown}
-          className={`px-8 py-3 rounded-xl font-semibold text-sm transition-all
-            ${isCooldown
-              ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-              : "bg-white text-black hover:bg-zinc-200 active:scale-95"
-            }`}
+          onClick={() => setBanner("regular")}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-all
+            ${banner === "regular" ? "bg-zinc-700 text-white" : "bg-zinc-900 text-zinc-500 hover:text-zinc-300"}`}
         >
-          {isCooldown ? `Wait ${formatTime(timeLeft)}` : card ? "Draw Again" : "Draw Card"}
+          🃏 Regular
         </button>
-
-        {justDrawn && card && (
-          <button
-            onClick={handleKeep}
-            className="px-6 py-3 rounded-xl font-semibold text-sm bg-amber-500 text-black hover:bg-amber-400 active:scale-95 transition-all"
-          >
-            Keep →
-          </button>
-        )}
+        <button
+          onClick={() => setBanner("deluxe")}
+          className={`flex-1 py-2.5 text-sm font-semibold transition-all
+            ${banner === "deluxe" ? "bg-amber-600 text-black" : "bg-zinc-900 text-zinc-500 hover:text-zinc-300"}`}
+        >
+          ✨ Deluxe
+        </button>
       </div>
 
-      {justDrawn && (
-        <p className="text-xs text-zinc-500">Draw again to discard, or keep to add to inventory</p>
-      )}
+      {banner === "regular" ? (
+        <div className="space-y-4">
+          {/* Rate card */}
+          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold">Regular Banner</p>
+              <span className="text-xs text-zinc-500">1 pull per minute</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {Object.entries(REGULAR_RATES).map(([r, w]) => (
+                <div key={r} className="flex justify-between">
+                  <span className={`px-2 py-0.5 rounded-full ${RARITY_STYLE[r] ?? "bg-zinc-700 text-zinc-300"}`}>{r}</span>
+                  <span className="text-zinc-400">{w}%</span>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-zinc-800 pt-3">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-zinc-400">Pity counter</span>
+                <span className="font-medium">{regularPity} / {REGULAR_PITY}</span>
+              </div>
+              <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-purple-500 rounded-full transition-all"
+                  style={{ width: `${(regularPity / REGULAR_PITY) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-zinc-600 mt-1">Guaranteed Epic at {REGULAR_PITY} pulls</p>
+            </div>
+          </div>
 
-      <p className="text-xs text-zinc-600">
-        {inventory.length} card{inventory.length !== 1 ? "s" : ""} in inventory
-      </p>
+          <button
+            onClick={pullRegular}
+            disabled={isCooldown}
+            className={`w-full py-3 rounded-xl font-semibold text-sm transition-all
+              ${isCooldown ? "bg-zinc-700 text-zinc-400 cursor-not-allowed" : "bg-white text-black hover:bg-zinc-200 active:scale-95"}`}
+          >
+            {isCooldown ? `Next pull in ${formatTime(timeLeft)}` : "Pull (Free)"}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Deluxe rate card */}
+          <div className="rounded-xl bg-zinc-900 border border-amber-800/50 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-amber-300">Deluxe Banner</p>
+              <ShardBadge shards={shards} />
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {Object.entries(DELUXE_RATES).map(([r, w]) => (
+                <div key={r} className="flex justify-between">
+                  <span className={`px-2 py-0.5 rounded-full ${RARITY_STYLE[r] ?? "bg-zinc-700 text-zinc-300"}`}>{r}</span>
+                  <span className="text-zinc-400">{w}%</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-zinc-500 border-t border-zinc-800 pt-2">
+              Earn 🪨 Brainrot Shards by winning battles ({SHARD_WIN_MIN}–{SHARD_WIN_MAX} per win). Top-up coming soon.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => pullDeluxe(1)}
+              disabled={shards < DELUXE_1_COST}
+              className={`py-3 rounded-xl font-semibold text-sm transition-all flex flex-col items-center gap-0.5
+                ${shards >= DELUXE_1_COST ? "bg-amber-600 text-black hover:bg-amber-500 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+            >
+              <span>1 Pull</span>
+              <span className="text-xs font-normal opacity-80">🪨 {DELUXE_1_COST}</span>
+            </button>
+            <button
+              onClick={() => pullDeluxe(10)}
+              disabled={shards < DELUXE_10_COST}
+              className={`py-3 rounded-xl font-semibold text-sm transition-all flex flex-col items-center gap-0.5
+                ${shards >= DELUXE_10_COST ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+            >
+              <span>10 Pull</span>
+              <span className="text-xs font-normal opacity-80">🪨 {DELUXE_10_COST}</span>
+            </button>
+          </div>
+
+          {shards < DELUXE_1_COST && (
+            <p className="text-xs text-zinc-500 text-center">
+              You need {DELUXE_1_COST - shards} more shards. Win battles to earn them!
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function CollectionTab({ inventory }: { inventory: OwnedCard[] }) {
+// ── Collection ─────────────────────────────────────────────────────────────
+function CollectionTab({ collection }: { collection: OwnedCard[] }) {
+  if (collection.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-20 text-zinc-600">
+        <span style={{ fontSize: 48 }}>📖</span>
+        <p className="text-sm">No cards yet — pull some!</p>
+      </div>
+    );
+  }
   const unique = Object.values(
-    inventory.reduce<Record<string, OwnedCard>>((acc, c) => {
+    collection.reduce<Record<string, OwnedCard>>((acc, c) => {
       if (!acc[c.name] || c.stars > acc[c.name].stars) acc[c.name] = c;
       return acc;
     }, {})
   );
-
-  if (unique.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-3 py-20 text-zinc-600">
-        <span style={{ fontSize: 48 }}>📖</span>
-        <p className="text-sm">No cards collected yet — go draw some!</p>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full">
-      <p className="text-sm text-zinc-500 mb-4">
-        {unique.length} unique card{unique.length !== 1 ? "s" : ""} discovered
-      </p>
+      <p className="text-sm text-zinc-500 mb-4">{unique.length} unique card{unique.length !== 1 ? "s" : ""} discovered</p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {unique.map((c) => (
-          <div
-            key={c.name}
-            className={`rounded-xl border-2 bg-zinc-900 p-3 flex flex-col items-center gap-2 ${RARITY_BORDER[c.rarity] ?? "border-zinc-700"} ${RARITY_GLOW[c.rarity] ?? ""}`}
-          >
-            <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-zinc-800">
-              <Image src={c.image} alt={c.name} fill sizes="150px" style={{ objectFit: "cover" }} />
-            </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${RARITY_STYLE[c.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>
-              {c.rarity}
-            </span>
-            <p className="text-xs font-semibold text-center leading-tight">{c.name}</p>
-            <StarRow count={c.stars} />
-          </div>
-        ))}
+        {unique.map((c) => <MiniCard key={c.name} c={c} />)}
       </div>
     </div>
   );
 }
 
-function InventoryTab({
-  inventory,
-  onRemove,
+// ── Battle ─────────────────────────────────────────────────────────────────
+function BattleTab({
+  collection,
+  onBattleEnd,
 }: {
-  inventory: OwnedCard[];
-  onRemove: (id: string) => void;
+  collection: OwnedCard[];
+  onBattleEnd: (drops: Item[], shards: number) => void;
 }) {
-  if (inventory.length === 0) {
+  const [playerCard, setPlayerCard] = useState<OwnedCard | null>(null);
+  const [enemyCard, setEnemyCard]   = useState<OwnedCard | null>(null);
+  const [result, setResult]         = useState<BattleResult | null>(null);
+  const [phase, setPhase]           = useState<"select" | "fighting" | "result">("select");
+
+  function startBattle() {
+    if (!playerCard) return;
+    const enemyBase  = (cards as Card[])[Math.floor(Math.random() * cards.length)];
+    const enemy: OwnedCard = makeOwned(enemyBase);
+    enemy.stars = Math.ceil(Math.random() * 3);
+    setEnemyCard(enemy);
+    setPhase("fighting");
+
+    setTimeout(() => {
+      const pPow = cardPower(playerCard);
+      const ePow = cardPower(enemy);
+      const win  = pPow >= ePow;
+
+      const log: string[] = [`${playerCard.name} (${pPow} pwr) vs ${enemy.name} (${ePow} pwr)`];
+      STATS_CONFIG.forEach(({ key, label }) => {
+        const ps = playerCard.stats[key], es = enemy.stats[key];
+        log.push(ps > es ? `✓ ${label}: ${ps} vs ${es}` : ps < es ? `✗ ${label}: ${ps} vs ${es}` : `= ${label}: ${ps}`);
+      });
+
+      const dropCount  = win ? Math.floor(Math.random() * 3) + 2 : 1;
+      const drops      = rollDrops(dropCount);
+      const shards     = win
+        ? Math.floor(Math.random() * (SHARD_WIN_MAX - SHARD_WIN_MIN + 1)) + SHARD_WIN_MIN
+        : SHARD_LOSS;
+
+      log.push(win
+        ? `🏆 Victory! +${shards} 🪨 shards, ${drops.length} item drop${drops.length !== 1 ? "s" : ""}`
+        : `💀 Defeat. +${shards} 🪨 shards consolation`
+      );
+
+      setResult({ winner: win ? "player" : "enemy", drops, shardsEarned: shards, log });
+      setPhase("result");
+    }, 1400);
+  }
+
+  function claimAndReset() {
+    if (result) onBattleEnd(result.drops, result.shardsEarned);
+    setResult(null); setEnemyCard(null); setPhase("select");
+  }
+
+  if (collection.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-zinc-600">
-        <span style={{ fontSize: 48 }}>🎒</span>
-        <p className="text-sm">Your inventory is empty</p>
+        <span style={{ fontSize: 48 }}>⚔️</span>
+        <p className="text-sm">You need cards to battle — pull some first</p>
+      </div>
+    );
+  }
+
+  if (phase === "select") {
+    return (
+      <div className="space-y-6">
+        <p className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">Choose your fighter</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {collection.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setPlayerCard(playerCard?.id === c.id ? null : c)}
+              className={`rounded-xl border-2 transition-all p-2 flex flex-col items-center gap-1.5 bg-zinc-900
+                ${playerCard?.id === c.id
+                  ? (RARITY_BORDER[c.rarity] ?? "border-zinc-700") + " scale-105 " + (RARITY_GLOW[c.rarity] ?? "")
+                  : "border-zinc-800 hover:border-zinc-600"
+                }`}
+            >
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-zinc-800">
+                <Image src={c.image} alt={c.name} fill sizes="100px" style={{ objectFit: "cover" }} />
+              </div>
+              <p className="text-xs font-semibold text-center w-full truncate">{c.name}</p>
+              <StarRow count={c.stars} />
+              <p className="text-xs text-zinc-500">{cardPower(c)} pwr</p>
+            </button>
+          ))}
+        </div>
+        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-3 text-xs text-zinc-500">
+          Win battles to earn <span className="text-amber-300 font-semibold">🪨 {SHARD_WIN_MIN}–{SHARD_WIN_MAX} Brainrot Shards</span> per victory. Use shards for Deluxe pulls.
+        </div>
+        <button
+          onClick={startBattle}
+          disabled={!playerCard}
+          className={`w-full py-3 rounded-xl font-semibold text-sm transition-all
+            ${playerCard ? "bg-red-600 text-white hover:bg-red-500 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
+        >
+          {playerCard ? `Battle with ${playerCard.name}` : "Select a card to battle"}
+        </button>
+      </div>
+    );
+  }
+
+  if (phase === "fighting") {
+    return (
+      <div className="flex flex-col items-center gap-8 py-10">
+        <div className="flex items-center gap-6">
+          {playerCard && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-white animate-pulse">
+                <Image src={playerCard.image} alt={playerCard.name} fill sizes="112px" style={{ objectFit: "cover" }} />
+              </div>
+              <p className="text-xs font-semibold">{playerCard.name}</p>
+            </div>
+          )}
+          <span className="text-3xl font-black text-red-500">VS</span>
+          {enemyCard && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative w-28 h-28 rounded-xl overflow-hidden border-2 border-red-600 animate-pulse">
+                <Image src={enemyCard.image} alt={enemyCard.name} fill sizes="112px" style={{ objectFit: "cover" }} />
+              </div>
+              <p className="text-xs font-semibold">{enemyCard.name}</p>
+            </div>
+          )}
+        </div>
+        <p className="text-zinc-400 text-sm animate-pulse">Battle in progress…</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-2">
-      <p className="text-sm text-zinc-500 mb-4">
-        {inventory.length} card{inventory.length !== 1 ? "s" : ""} owned
-      </p>
-      {inventory.map((c) => (
-        <div
-          key={c.id}
-          className={`flex items-center gap-3 rounded-xl border bg-zinc-900 p-3 ${RARITY_BORDER[c.rarity] ?? "border-zinc-800"}`}
-        >
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
-            <Image src={c.image} alt={c.name} fill sizes="48px" style={{ objectFit: "cover" }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{c.name}</p>
-            <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-0.5 rounded-full ${RARITY_STYLE[c.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>
-                {c.rarity}
-              </span>
-              <StarRow count={c.stars} />
+    <div className="space-y-5">
+      <div className={`rounded-2xl border-2 p-5 text-center ${result?.winner === "player" ? "border-green-600 bg-green-950/30" : "border-red-700 bg-red-950/20"}`}>
+        <p className="text-2xl font-black mb-1">{result?.winner === "player" ? "🏆 Victory!" : "💀 Defeated"}</p>
+        {result && (
+          <p className="text-sm font-semibold mt-1">
+            <span className="text-amber-300">+{result.shardsEarned} 🪨</span> Brainrot Shards earned
+          </p>
+        )}
+        <div className="flex justify-center gap-6 mt-3">
+          {playerCard && (
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                <Image src={playerCard.image} alt={playerCard.name} fill sizes="64px" style={{ objectFit: "cover" }} />
+              </div>
+              <p className="text-xs text-zinc-400">You — {cardPower(playerCard)} pwr</p>
             </div>
-          </div>
-          <button
-            onClick={() => onRemove(c.id)}
-            className="text-xs text-zinc-600 hover:text-red-400 transition-colors px-2 py-1"
-            title="Discard"
-          >
-            ✕
-          </button>
+          )}
+          <span className="text-xl font-black self-center text-zinc-500">vs</span>
+          {enemyCard && (
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                <Image src={enemyCard.image} alt={enemyCard.name} fill sizes="64px" style={{ objectFit: "cover" }} />
+              </div>
+              <p className="text-xs text-zinc-400">Enemy — {cardPower(enemyCard)} pwr</p>
+            </div>
+          )}
         </div>
-      ))}
+      </div>
+
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-1">
+        {result?.log.map((line, i) => (
+          <p key={i} className="text-xs text-zinc-400 font-mono">{line}</p>
+        ))}
+      </div>
+
+      {result && result.drops.length > 0 && (
+        <div>
+          <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Item Drops</p>
+          <div className="grid grid-cols-2 gap-2">
+            {result.drops.map((item) => (
+              <div key={item.id} className={`rounded-xl border bg-zinc-900 p-3 flex items-center gap-3 ${ITEM_RARITY_BORDER[item.rarity]}`}>
+                <span style={{ fontSize: 24 }}>{item.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold truncate">{item.name}</p>
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${ITEM_RARITY_STYLE[item.rarity]}`}>{item.rarity}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button onClick={claimAndReset} className="w-full py-3 rounded-xl font-semibold text-sm bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all">
+        Claim & battle again
+      </button>
     </div>
   );
 }
 
-function RefineryTab({
-  inventory,
-  onUpgrade,
-}: {
-  inventory: OwnedCard[];
+// ── Inventory ──────────────────────────────────────────────────────────────
+function InventoryTab({ items, shards }: { items: Item[]; shards: number }) {
+  const merged = Object.values(
+    items.reduce<Record<string, Item>>((acc, item) => {
+      if (acc[item.name]) acc[item.name] = { ...acc[item.name], quantity: acc[item.name].quantity + 1 };
+      else acc[item.name] = { ...item };
+      return acc;
+    }, {})
+  ).sort((a, b) => {
+    const order: ItemRarity[] = ["Legendary", "Epic", "Rare", "Uncommon", "Common"];
+    return order.indexOf(a.rarity) - order.indexOf(b.rarity);
+  });
+
+  return (
+    <div className="w-full space-y-4">
+      {/* Shard wallet */}
+      <div className="rounded-xl bg-zinc-900 border border-amber-800/60 p-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-amber-300">Brainrot Shards</p>
+          <p className="text-xs text-zinc-500 mt-0.5">Earn by winning battles · spend on Deluxe pulls</p>
+        </div>
+        <ShardBadge shards={shards} />
+      </div>
+
+      {merged.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-zinc-600">
+          <span style={{ fontSize: 48 }}>🎒</span>
+          <p className="text-sm">No items yet — win battles to earn drops</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-sm text-zinc-500">{items.length} item{items.length !== 1 ? "s" : ""} collected</p>
+          {merged.map((item) => (
+            <div key={item.name} className={`flex items-center gap-4 rounded-xl border bg-zinc-900 p-3 ${ITEM_RARITY_BORDER[item.rarity]}`}>
+              <span style={{ fontSize: 28 }}>{item.icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-sm">{item.name}</p>
+                  {item.quantity > 1 && (
+                    <span className="text-xs bg-zinc-700 text-zinc-300 px-1.5 py-0.5 rounded-full">×{item.quantity}</span>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-500 mt-0.5">{item.description}</p>
+              </div>
+              <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${ITEM_RARITY_STYLE[item.rarity]}`}>{item.rarity}</span>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Refinery ───────────────────────────────────────────────────────────────
+function RefineryTab({ collection, onUpgrade }: {
+  collection: OwnedCard[];
   onUpgrade: (targetId: string, sacrificeIds: string[]) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const selected = inventory.find((c) => c.id === selectedId) ?? null;
-
-  // Cards of the same name that aren't the selected one, to use as fuel
-  const fuelCards = selected
-    ? inventory.filter((c) => c.name === selected.name && c.id !== selectedId)
-    : [];
-
+  const selected   = collection.find((c) => c.id === selectedId) ?? null;
+  const fuelCards  = selected ? collection.filter((c) => c.name === selected.name && c.id !== selectedId) : [];
   const canUpgrade = selected && fuelCards.length >= UPGRADE_COST && selected.stars < 5;
 
   function handleUpgrade() {
     if (!selected || !canUpgrade) return;
-    const sacrificeIds = fuelCards.slice(0, UPGRADE_COST).map((c) => c.id);
-    onUpgrade(selected.id, sacrificeIds);
+    onUpgrade(selected.id, fuelCards.slice(0, UPGRADE_COST).map((c) => c.id));
     setSelectedId(null);
   }
 
-  // Group by card name for selection UI
   const groups = Object.entries(
-    inventory.reduce<Record<string, OwnedCard[]>>((acc, c) => {
-      (acc[c.name] = acc[c.name] ?? []).push(c);
-      return acc;
-    }, {})
-  ).filter(([, arr]) => arr.length > 0);
+    collection.reduce<Record<string, OwnedCard[]>>((acc, c) => { (acc[c.name] = acc[c.name] ?? []).push(c); return acc; }, {})
+  );
 
   if (groups.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-zinc-600">
         <span style={{ fontSize: 48 }}>⚗️</span>
-        <p className="text-sm">No cards to refine — collect some first</p>
+        <p className="text-sm">No cards to refine — pull some first</p>
       </div>
     );
   }
@@ -400,19 +797,16 @@ function RefineryTab({
     <div className="w-full space-y-6">
       <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-1">
         <p className="text-sm font-semibold">How it works</p>
-        <p className="text-xs text-zinc-400">
-          Select a card to upgrade, then sacrifice {UPGRADE_COST} duplicates of the same card to gain 1 ★. Max 5 ★.
-        </p>
+        <p className="text-xs text-zinc-400">Sacrifice {UPGRADE_COST} duplicate cards of the same type to gain 1 ★. Max 5 ★.</p>
       </div>
 
-      {/* Card selection */}
       <div>
         <p className="text-xs text-zinc-500 mb-2 uppercase tracking-wide">Select card to upgrade</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {groups.map(([name, arr]) => {
             const best = arr.reduce((a, b) => (a.stars >= b.stars ? a : b));
             const isSelected = selectedId === best.id;
-            const dupeCount = arr.filter((c) => c.id !== best.id).length;
+            const dupeCount  = arr.filter((c) => c.id !== best.id).length;
             return (
               <button
                 key={name}
@@ -424,7 +818,7 @@ function RefineryTab({
                   }`}
               >
                 <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-zinc-800">
-                  <Image src={best.image} alt={best.name} fill sizes="120px" style={{ objectFit: "cover" }} />
+                  <Image src={best.image} alt={best.name} fill sizes="100px" style={{ objectFit: "cover" }} />
                 </div>
                 <p className="text-xs font-semibold text-center leading-tight truncate w-full">{name}</p>
                 <StarRow count={best.stars} />
@@ -435,7 +829,6 @@ function RefineryTab({
         </div>
       </div>
 
-      {/* Upgrade panel */}
       {selected && (
         <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
           <div className="flex items-center justify-between">
@@ -443,14 +836,10 @@ function RefineryTab({
               <p className="font-semibold text-sm">{selected.name}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 <StarRow count={selected.stars} />
-                {selected.stars < 5 && (
-                  <span className="text-zinc-500 text-xs">→ {selected.stars + 1} ★</span>
-                )}
+                {selected.stars < 5 && <span className="text-zinc-500 text-xs">→ {selected.stars + 1} ★</span>}
               </div>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${RARITY_STYLE[selected.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>
-              {selected.rarity}
-            </span>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${RARITY_STYLE[selected.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>{selected.rarity}</span>
           </div>
 
           {selected.stars >= 5 ? (
@@ -459,28 +848,18 @@ function RefineryTab({
             <>
               <div className="flex justify-between text-xs text-zinc-400">
                 <span>Duplicates available</span>
-                <span className={fuelCards.length >= UPGRADE_COST ? "text-green-400" : "text-red-400"}>
-                  {fuelCards.length} / {UPGRADE_COST}
-                </span>
+                <span className={fuelCards.length >= UPGRADE_COST ? "text-green-400" : "text-red-400"}>{fuelCards.length} / {UPGRADE_COST}</span>
               </div>
               <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-amber-500 rounded-full transition-all"
-                  style={{ width: `${Math.min(100, (fuelCards.length / UPGRADE_COST) * 100)}%` }}
-                />
+                <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${Math.min(100, (fuelCards.length / UPGRADE_COST) * 100)}%` }} />
               </div>
               <button
                 onClick={handleUpgrade}
                 disabled={!canUpgrade}
                 className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all
-                  ${canUpgrade
-                    ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95"
-                    : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-                  }`}
+                  ${canUpgrade ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"}`}
               >
-                {canUpgrade
-                  ? `Upgrade to ${selected.stars + 1} ★ (costs ${UPGRADE_COST} dupes)`
-                  : `Need ${UPGRADE_COST - fuelCards.length} more duplicate${UPGRADE_COST - fuelCards.length !== 1 ? "s" : ""}`}
+                {canUpgrade ? `Upgrade to ${selected.stars + 1} ★` : `Need ${UPGRADE_COST - fuelCards.length} more duplicate${UPGRADE_COST - fuelCards.length !== 1 ? "s" : ""}`}
               </button>
             </>
           )}
@@ -492,88 +871,92 @@ function RefineryTab({
 
 // ── Main Page ──────────────────────────────────────────────────────────────
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<Tab>("draw");
-  const [inventory, setInventory] = useState<OwnedCard[]>([]);
+  const [activeTab,    setActiveTab]    = useState<Tab>("packs");
+  const [collection,   setCollection]   = useState<OwnedCard[]>([]);
+  const [items,        setItems]        = useState<Item[]>([]);
+  const [shards,       setShards]       = useState(0);
+  const [regularPity,  setRegularPity]  = useState(0);
 
-  // Persist inventory
   useEffect(() => {
-    const saved = localStorage.getItem("inventory");
-    if (saved) setInventory(JSON.parse(saved));
+    const c = localStorage.getItem("collection");
+    const i = localStorage.getItem("items");
+    const s = localStorage.getItem("shards");
+    const p = localStorage.getItem("regularPity");
+    if (c) setCollection(JSON.parse(c));
+    if (i) setItems(JSON.parse(i));
+    if (s) setShards(Number(s));
+    if (p) setRegularPity(Number(p));
   }, []);
 
-  const saveInventory = useCallback((inv: OwnedCard[]) => {
-    setInventory(inv);
-    localStorage.setItem("inventory", JSON.stringify(inv));
-  }, []);
+  const saveCollection  = useCallback((c: OwnedCard[]) => { setCollection(c);  localStorage.setItem("collection",  JSON.stringify(c)); }, []);
+  const saveItems       = useCallback((i: Item[])      => { setItems(i);        localStorage.setItem("items",       JSON.stringify(i)); }, []);
+  const saveShards      = useCallback((n: number)      => { setShards(n);       localStorage.setItem("shards",      String(n)); }, []);
+  const saveRegularPity = useCallback((n: number)      => { setRegularPity(n);  localStorage.setItem("regularPity", String(n)); }, []);
 
-  function handleDraw(card: OwnedCard) {
-    saveInventory([...inventory, card]);
+  function handleKeepCards(newCards: OwnedCard[]) { saveCollection([...collection, ...newCards]); }
+  function handleSpendShards(n: number)           { saveShards(Math.max(0, shards - n)); }
+  function handleBattleEnd(drops: Item[], earned: number) {
+    saveItems([...items, ...drops]);
+    saveShards(shards + earned);
   }
-
-  function handleRemove(id: string) {
-    saveInventory(inventory.filter((c) => c.id !== id));
-  }
-
   function handleUpgrade(targetId: string, sacrificeIds: string[]) {
-    const next = inventory
-      .filter((c) => !sacrificeIds.includes(c.id))
-      .map((c) => (c.id === targetId ? { ...c, stars: Math.min(5, c.stars + 1) } : c));
-    saveInventory(next);
+    saveCollection(
+      collection
+        .filter((c) => !sacrificeIds.includes(c.id))
+        .map((c) => c.id === targetId ? { ...c, stars: Math.min(5, c.stars + 1) } : c)
+    );
   }
+
+  const uniqueCards = new Set(collection.map((c) => c.name)).size;
 
   return (
     <div className="min-h-screen flex bg-zinc-950 text-white">
-      {/* Sidebar */}
       <aside className="w-52 shrink-0 flex flex-col border-r border-zinc-800 bg-zinc-950 py-8 px-3 gap-2">
-        <h1 className="text-base font-bold tracking-tight px-3 mb-4">
-          🧠 Brainrot
-        </h1>
+        <h1 className="text-base font-bold tracking-tight px-3 mb-4">🧠 Brainrot</h1>
         {NAV_ITEMS.map(({ tab, label, icon }) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left
-              ${activeTab === tab
-                ? "bg-zinc-800 text-white"
-                : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
-              }`}
+              ${activeTab === tab ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"}`}
           >
             <span style={{ fontSize: 18 }}>{icon}</span>
             {label}
           </button>
         ))}
 
-        {/* Inventory count badge */}
-        <div className="mt-auto px-3 pt-4 border-t border-zinc-800">
-          <p className="text-xs text-zinc-600">
-            Inventory:{" "}
-            <span className="text-zinc-400 font-medium">{inventory.length}</span>
-          </p>
+        <div className="mt-auto px-3 pt-4 border-t border-zinc-800 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-zinc-600">Shards</p>
+            <ShardBadge shards={shards} />
+          </div>
+          <p className="text-xs text-zinc-600">Cards: <span className="text-zinc-400 font-medium">{collection.length}</span></p>
+          <p className="text-xs text-zinc-600">Unique: <span className="text-zinc-400 font-medium">{uniqueCards}</span></p>
+          <p className="text-xs text-zinc-600">Items: <span className="text-zinc-400 font-medium">{items.length}</span></p>
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col items-center justify-start p-10 overflow-y-auto">
         <div className="w-full max-w-lg">
-          {/* Tab heading */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold tracking-tight">
               {NAV_ITEMS.find((n) => n.tab === activeTab)?.label}
             </h2>
           </div>
 
-          {activeTab === "draw" && (
-            <DrawTab inventory={inventory} onDraw={handleDraw} />
+          {activeTab === "packs"      && (
+            <PacksTab
+              shards={shards}
+              regularPity={regularPity}
+              onKeepCards={handleKeepCards}
+              onSpendShards={handleSpendShards}
+              onRegularPull={saveRegularPity}
+            />
           )}
-          {activeTab === "collection" && (
-            <CollectionTab inventory={inventory} />
-          )}
-          {activeTab === "inventory" && (
-            <InventoryTab inventory={inventory} onRemove={handleRemove} />
-          )}
-          {activeTab === "refinery" && (
-            <RefineryTab inventory={inventory} onUpgrade={handleUpgrade} />
-          )}
+          {activeTab === "collection" && <CollectionTab collection={collection} />}
+          {activeTab === "battle"     && <BattleTab collection={collection} onBattleEnd={handleBattleEnd} />}
+          {activeTab === "inventory"  && <InventoryTab items={items} shards={shards} />}
+          {activeTab === "refinery"   && <RefineryTab collection={collection} onUpgrade={handleUpgrade} />}
         </div>
       </main>
     </div>

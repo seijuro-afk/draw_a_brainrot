@@ -1,16 +1,37 @@
-const RARITY_BOOST: Record<string, number> = {
-    Common: 5,
-    Rare: 20,
-    Epic: 40,
-    Legendary: 65,
-}
-
-const RARITY_BASE: Record<string, number> = {
-    Common: 0,
-    Rare: 10,
-    Epic: 60,
-    Legendary: 100,
-}
+const RARITY_RANGES: Record<
+  string,
+  {
+    brainrotPower: [number, number]; // attack
+    rizz: [number, number];          // hp
+    sigmaAura: [number, number];     // defense
+    npcEnergy: [number, number];     // mana
+  }
+> = {
+  Common: {
+    brainrotPower: [10, 25],
+    rizz: [60, 90],
+    sigmaAura: [5, 15],
+    npcEnergy: [20, 40],
+  },
+  Rare: {
+    brainrotPower: [20, 40],
+    rizz: [85, 120],
+    sigmaAura: [12, 25],
+    npcEnergy: [35, 60],
+  },
+  Epic: {
+    brainrotPower: [35, 60],
+    rizz: [120, 160],
+    sigmaAura: [20, 40],
+    npcEnergy: [55, 85],
+  },
+  Legendary: {
+    brainrotPower: [55, 85],
+    rizz: [160, 220],
+    sigmaAura: [35, 60],
+    npcEnergy: [80, 120],
+  },
+};
 
 function hashSeed(str: string): number {
   let hash = 2166136261;
@@ -30,41 +51,22 @@ function statInRange(seed: number, index: number, min: number, max: number): num
   return Math.round(seededRand(seed, index) * (max - min) + min);
 }
 
-const ABILITIES = [
-  "Appears from nowhere and stares into your soul.",
-  "Emits a frequency that makes NPCs freeze.",
-  "Has never lost a staring contest. Ever.",
-  "Transforms sigma energy into pure chaos.",
-  "Yaps endlessly until enemies surrender.",
-  "Radiates an aura of unhinged confidence.",
-  "Skips the tutorial and goes straight to boss mode.",
-  "NPC dialogue options have no effect on this entity.",
-  "Drops from the sky with zero explanation.",
-  "Rizz so high it bends reality slightly.",
-  "Exists in a permanent state of delusion.",
-  "Cannot be ratio'd under any circumstances.",
-];
-
 export type CardStats = {
-  brainrotPower: number;
-  rizz: number;
-  sigmaAura: number;
-  npcEnergy: number;
-  ability: string;
+  brainrotPower: number; // attack
+  rizz: number;         // hp
+  sigmaAura: number;    // defense
+  npcEnergy: number;    // mana
 };
 
 export function generateStats(name: string, rarity: string): CardStats {
   const seed = hashSeed(name);
-  const boost = RARITY_BOOST[rarity] ?? 0;
-  const base = RARITY_BASE[rarity] ?? 0;
-  const min = 1;
-  const max = Math.min(100, 10 + boost);
+
+  const ranges = RARITY_RANGES[rarity] ?? RARITY_RANGES["Common"];
 
   return {
-    brainrotPower: statInRange(seed, 1, min, max) + base,
-    rizz: statInRange(seed, 2, min, max) + base,
-    sigmaAura: statInRange(seed, 3, min, max) + base,
-    npcEnergy: statInRange(seed, 4, min, max) + base,
-    ability: ABILITIES[seed % ABILITIES.length],
+    brainrotPower: statInRange(seed, 1, ...ranges.brainrotPower),
+    rizz: statInRange(seed, 2, ...ranges.rizz),
+    sigmaAura: statInRange(seed, 3, ...ranges.sigmaAura),
+    npcEnergy: statInRange(seed, 4, ...ranges.npcEnergy),
   };
 }

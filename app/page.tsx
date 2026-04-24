@@ -8,8 +8,8 @@ import Image from "next/image";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Card = { name: string; rarity: string; image: string };
-type OwnedCard = Card & { stats: CardStats; id: string; stars: number; obtainedAt: number };
-type Tab = "packs" | "collection" | "battle" | "inventory" | "crafting" | "shop" | "refinery";
+type OwnedCard = Card & { stats: CardStats; id: string; stars: number; obtainedAt: number; favorited?: boolean };
+type Tab = "packs" | "collection" | "battle" | "inventory" | "crafting" | "shop" | "refinery" | "profile";
 type BannerType = "regular" | "deluxe";
 type SortMode = "power" | "rarity" | "date";
 type ItemRarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary";
@@ -81,6 +81,7 @@ const ITEM_RARITY_STYLE: Record<ItemRarity, string> = { Common: "bg-zinc-700 tex
 const ITEM_RARITY_BORDER: Record<ItemRarity, string> = { Common: "border-zinc-700", Uncommon: "border-green-700", Rare: "border-blue-700", Epic: "border-purple-600", Legendary: "border-amber-500" };
 
 const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
+  {tab: "profile", label: "Profile", icon: "👤"} ,
   { tab: "packs",      label: "Packs",      icon: "📦" },
   { tab: "collection", label: "Collection", icon: "📖" },
   { tab: "battle",     label: "Battle",     icon: "⚔️"  },
@@ -88,6 +89,7 @@ const NAV_ITEMS: { tab: Tab; label: string; icon: string }[] = [
   { tab: "crafting",   label: "Crafting",   icon: "🔨"  },
   { tab: "shop",       label: "Shop",       icon: "🏪"  },
   { tab: "refinery",   label: "Refinery",   icon: "⚗️"  },
+  
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -349,11 +351,243 @@ function PacksTab({ shards, regularPity, onKeepCards, onSpendShards, onRegularPu
   );
 }
 
+
+// ── Stat Bar ───────────────────────────────────────────────────────────────
+function StatBar({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1">
+        <span className="text-zinc-400">{label}</span>
+        <span className="font-medium text-zinc-200">{value}</span>
+      </div>
+      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${Math.min(100, (value / max) * 100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+// ── Inspect Modal ──────────────────────────────────────────────────────────
+function InspectModal({ card, onClose, onFavorite, onDelete }: {
+  card: OwnedCard; onClose: () => void;
+  onFavorite: () => void; onDelete: () => void;
+}) {
+  const def = GAME_DATA[card.name] ?? null;
+  const boost = 1 + (card.stars - 1) * 0.1;
+  const hp  = Math.round(card.stats.rizz          * boost);
+  const atk = Math.round(card.stats.brainrotPower * boost);
+  const def2= Math.round(card.stats.sigmaAura     * boost);
+  const man = Math.round(card.stats.npcEnergy     * boost);
+  const pwr = cardPowerScore(card);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const moveKeys = ["basic", "special", "defense", "ultimate"] as const;
+  const moveColors: Record<string, string> = { basic: "bg-zinc-700", special: "bg-blue-800", defense: "bg-green-800", ultimate: "bg-amber-800" };
+  const moveIcons: Record<string, string>  = { basic: "⚔️", special: "✨", defense: "🛡️", ultimate: "💥" };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className={`relative w-full max-w-sm rounded-2xl border-2 bg-zinc-950 flex flex-col overflow-hidden ${RARITY_BORDER[card.rarity] ?? "border-zinc-700"} ${RARITY_GLOW[card.rarity] ?? ""}`}
+        style={{ maxHeight: "90vh" }}>
+        {/* Image header */}
+        <div className="relative w-full" style={{ height: 200 }}>
+          <Image src={card.image} alt={card.name} fill sizes="400px" style={{ objectFit: "cover" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(9,9,11,0.95) 100%)" }} />
+          {/* Close */}
+          <button onClick={onClose} className="absolute top-3 right-3 w-7 h-7 rounded-full bg-zinc-900/80 flex items-center justify-center text-zinc-400 hover:text-white text-sm">✕</button>
+          {/* Favorite badge */}
+          {card.favorited && <span className="absolute top-3 left-3 text-lg">⭐</span>}
+          {/* Name + rarity overlay */}
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="font-bold text-base leading-tight">{card.name}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-xs px-2 py-0.5 rounded-full ${RARITY_STYLE[card.rarity] ?? ""}`}>{card.rarity}</span>
+              <StarRow count={card.stars} />
+              <span className="text-xs text-zinc-400 ml-auto">⚡ {pwr} pwr</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 p-4 space-y-4">
+          {/* Stats */}
+          <div className="space-y-2">
+            <p className="text-xs text-zinc-500 uppercase tracking-wide">Battle Stats</p>
+            <StatBar label="Rizz (HP)"          value={hp}  max={300} color="bg-green-500" />
+            <StatBar label="Brainrot Pow (ATK)"  value={atk} max={120} color="bg-red-500"   />
+            <StatBar label="Sigma Aura (DEF)"    value={def2}max={100} color="bg-purple-500"/>
+            <StatBar label="NPC Energy (MANA)"   value={man} max={150} color="bg-blue-500"  />
+          </div>
+
+          {/* Moves */}
+          {def && (
+            <div className="space-y-2">
+              <p className="text-xs text-zinc-500 uppercase tracking-wide">Moves</p>
+              {moveKeys.map((mk) => {
+                const move = def.moves[mk];
+                return (
+                  <div key={mk} className={`rounded-lg p-2.5 ${moveColors[mk]}/20 border border-${moveColors[mk].replace("bg-","")}/30`}>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs">{moveIcons[mk]}</span>
+                      <span className="text-xs font-semibold">{move.name}</span>
+                      {move.power > 0 && <span className="text-xs text-zinc-400 ml-auto">PWR {move.power}</span>}
+                    </div>
+                    <p className="text-xs text-zinc-400 leading-tight">{move.effectText}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={onFavorite}
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all border
+                ${card.favorited
+                  ? "border-yellow-600 bg-yellow-900/30 text-yellow-300 hover:bg-yellow-900/50"
+                  : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500"}`}>
+              {card.favorited ? "⭐ Unfavorite" : "☆ Favorite"}
+            </button>
+
+            {!confirmDelete ? (
+              <button onClick={() => setConfirmDelete(true)}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold border border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-red-700 hover:text-red-400 transition-all">
+                🗑 Delete
+              </button>
+            ) : (
+              <div className="flex-1 flex gap-1">
+                <button onClick={onDelete}
+                  className="flex-1 py-2 rounded-lg text-xs font-semibold bg-red-700 text-white hover:bg-red-600 active:scale-95 transition-all">
+                  Confirm
+                </button>
+                <button onClick={() => setConfirmDelete(false)}
+                  className="flex-1 py-2 rounded-lg text-xs font-semibold border border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all">
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Collection Tab ─────────────────────────────────────────────────────────
-function CollectionTab({ collection }: { collection: OwnedCard[] }) {
-  if (!collection.length) return <div className="flex flex-col items-center gap-3 py-20 text-zinc-600"><span style={{ fontSize: 48 }}>📖</span><p className="text-sm">No cards yet — pull some!</p></div>;
-  const unique = Object.values(collection.reduce<Record<string, OwnedCard>>((acc, c) => { if (!acc[c.name] || c.stars > acc[c.name].stars) acc[c.name] = c; return acc; }, {}));
-  return <div className="w-full"><p className="text-sm text-zinc-500 mb-4">{unique.length} unique card{unique.length !== 1 ? "s" : ""}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{unique.map((c) => <MiniCard key={c.name} c={c} />)}</div></div>;
+function CollectionTab({ collection, onFavorite, onDelete }: {
+  collection: OwnedCard[];
+  onFavorite: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [sortMode, setSortMode]       = useState<SortMode>("rarity");
+  const [filterFav, setFilterFav]     = useState(false);
+  const [inspecting, setInspecting]   = useState<OwnedCard | null>(null);
+
+  if (!collection.length) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-zinc-600">
+      <span style={{ fontSize: 48 }}>📖</span>
+      <p className="text-sm">No cards yet — pull some!</p>
+    </div>
+  );
+
+  // Deduplicate by name, keeping highest-starred version
+  const unique = Object.values(
+    collection.reduce<Record<string, OwnedCard>>((acc, c) => {
+      if (!acc[c.name] || c.stars > acc[c.name].stars) acc[c.name] = c;
+      return acc;
+    }, {})
+  );
+
+  const filtered = filterFav ? unique.filter((c) => c.favorited) : unique;
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortMode === "rarity") return (RARITY_ORDER[b.rarity] ?? 0) - (RARITY_ORDER[a.rarity] ?? 0);
+    if (sortMode === "power")  return cardPowerScore(b) - cardPowerScore(a);
+    return b.obtainedAt - a.obtainedAt;
+  });
+
+  return (
+    <>
+      {/* Inspect modal — rendered outside the scroll container */}
+      {inspecting && (
+        <InspectModal
+          card={inspecting}
+          onClose={() => setInspecting(null)}
+          onFavorite={() => {
+            onFavorite(inspecting.id);
+            setInspecting((prev) => prev ? { ...prev, favorited: !prev.favorited } : null);
+          }}
+          onDelete={() => {
+            onDelete(inspecting.id);
+            setInspecting(null);
+          }}
+        />
+      )}
+
+      <div className="flex flex-col h-full" style={{ height: "calc(100vh - 200px)" }}>
+        {/* Controls row */}
+        <div className="shrink-0 space-y-2 mb-3">
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-zinc-500 flex-1">
+              {sorted.length} card{sorted.length !== 1 ? "s" : ""}
+              {filterFav ? " ⭐" : ` / ${unique.length} unique`}
+            </p>
+            {/* Fav filter */}
+            <button onClick={() => setFilterFav((f) => !f)}
+              className={`px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all
+                ${filterFav ? "bg-yellow-900/40 border-yellow-700 text-yellow-300" : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300"}`}>
+              ⭐ Favs
+            </button>
+            {/* Sort */}
+            <div className="flex rounded-lg overflow-hidden border border-zinc-800 text-xs">
+              {(["rarity", "power", "date"] as SortMode[]).map((m) => (
+                <button key={m} onClick={() => setSortMode(m)}
+                  className={`px-2.5 py-1.5 font-medium transition-all
+                    ${sortMode === m ? "bg-zinc-700 text-white" : "bg-zinc-900 text-zinc-500 hover:text-zinc-300"}`}>
+                  {m === "rarity" ? "💎" : m === "power" ? "⚡" : "🕐"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Card grid — scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+          {sorted.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-16 text-zinc-600">
+              <span style={{ fontSize: 36 }}>⭐</span>
+              <p className="text-sm">No favorited cards yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pb-4">
+              {sorted.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() => setInspecting(c)}
+                  className={`rounded-xl border-2 bg-zinc-900 p-2 flex flex-col items-center gap-1.5 text-left transition-all hover:scale-[1.02] active:scale-[0.98]
+                    ${RARITY_BORDER[c.rarity] ?? "border-zinc-700"} ${RARITY_GLOW[c.rarity] ?? ""}`}>
+                  <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-zinc-800">
+                    <Image src={c.image} alt={c.name} fill sizes="100px" style={{ objectFit: "cover" }} />
+                    {c.favorited && (
+                      <span className="absolute top-1 right-1 text-sm leading-none">⭐</span>
+                    )}
+                  </div>
+                  <p className="text-xs font-semibold text-center leading-tight w-full truncate">{c.name}</p>
+                  <StarRow count={c.stars} />
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${RARITY_STYLE[c.rarity] ?? "bg-zinc-700 text-zinc-300"}`}>{c.rarity}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
 }
 
 // ── Battle Tab ─────────────────────────────────────────────────────────────
@@ -761,6 +995,12 @@ export default function Home() {
   function handleUpgrade(targetId: string, sacrificeIds: string[]) {
     saveCollection(collection.filter((c) => !sacrificeIds.includes(c.id)).map((c) => c.id === targetId ? { ...c, stars: Math.min(5, c.stars + 1) } : c));
   }
+  function handleFavorite(id: string) {
+    saveCollection(collection.map((c) => c.id === id ? { ...c, favorited: !c.favorited } : c));
+  }
+  function handleDeleteCard(id: string) {
+    saveCollection(collection.filter((c) => c.id !== id));
+  }
   function handleUseWKey(): boolean { if (countItem(items, "W Key") === 0) return false; saveItems(removeItems(items, "W Key", 1)); return true; }
   function handleUseItem(name: string) { saveItems(removeItems(items, name, 1)); }
   function handleCraft(recipe: Recipe) {
@@ -795,9 +1035,9 @@ export default function Home() {
       <main className="flex-1 flex flex-col p-8 overflow-hidden">
         <div className="w-full max-w-lg mx-auto flex flex-col h-full">
           <div className="mb-6 shrink-0"><h2 className="text-2xl font-bold tracking-tight">{NAV_ITEMS.find((n) => n.tab === activeTab)?.label}</h2></div>
-          <div className={`flex-1 min-h-0 ${activeTab === "battle" ? "overflow-hidden" : "overflow-y-auto"}`}>
+          <div className={`flex-1 min-h-0 ${activeTab === "battle" || activeTab === "collection" ? "overflow-hidden" : "overflow-y-auto"}`}>
             {activeTab === "packs"      && <PacksTab shards={shards} regularPity={regularPity} onKeepCards={handleKeepCards} onSpendShards={handleSpendShards} onRegularPull={saveRegularPity} onUseWKey={handleUseWKey} />}
-            {activeTab === "collection" && <CollectionTab collection={collection} />}
+            {activeTab === "collection" && <CollectionTab collection={collection} onFavorite={handleFavorite} onDelete={handleDeleteCard} />}
             {activeTab === "battle"     && <BattleTab collection={collection} items={items} onBattleEnd={handleBattleEnd} onUseItem={handleUseItem} />}
             {activeTab === "inventory"  && <InventoryTab items={items} shards={shards} />}
             {activeTab === "crafting"   && <CraftingTab items={items} onCraft={handleCraft} />}

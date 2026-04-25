@@ -1,3 +1,5 @@
+import { CardStats } from "./types";
+
 const RARITY_RANGES: Record<
   string,
   {
@@ -51,12 +53,6 @@ function statInRange(seed: number, index: number, min: number, max: number): num
   return Math.round(seededRand(seed, index) * (max - min) + min);
 }
 
-export type CardStats = {
-  brainrotPower: number; // attack
-  rizz: number;         // hp
-  sigmaAura: number;    // defense
-  npcEnergy: number;    // mana
-};
 
 export function generateStats(name: string, rarity: string): CardStats {
   const seed = hashSeed(name);

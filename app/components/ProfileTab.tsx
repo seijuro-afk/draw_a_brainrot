@@ -69,7 +69,7 @@ export function ProfileTab({ collection, items, shards, stats, onDeleteProfile }
           🧠
         </div>
         <div>
-          <p className="font-bold text-lg">Brainrot Player</p>
+          <p className="font-bold text-lg">{stats.username}</p>
           <p className="text-xs text-zinc-500 mt-0.5">Member since {joined}</p>
           <div className="flex gap-2 mt-2">
             <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded-full">{collection.length} cards</span>

@@ -27,6 +27,7 @@ export type BattleLogEntry = { text: string; kind: "player" | "enemy" | "effect"
 export type Recipe = { output: string; outputIcon: string; outputRarity: ItemRarity; ingredients: { name: string; icon: string; qty: number }[]; description: string };
 export type ShopItem = { name: string; icon: string; rarity: ItemRarity; costItem: string; costIcon: string; costQty: number; stock: number; maxStock: number; description: string };
 export type UserStats = {
+  username: string;
   totalPulls: number;
   regularPulls: number;
   deluxePulls: number;
@@ -42,8 +43,8 @@ export type UserStats = {
   favoritedCount: number;
   joinedAt: number;
 };
-export function emptyStats(): UserStats {
-  return { totalPulls: 0, regularPulls: 0, deluxePulls: 0, wKeyPulls: 0, wins: 0, losses: 0, totalShardsEarned: 0, totalShardsSpent: 0, itemsCrafted: 0, itemsBought: 0, cardsDeleted: 0, cardsUpgraded: 0, favoritedCount: 0, joinedAt: Date.now() };
+export function emptyStats(username?: string): UserStats {
+  return { username: username || '', totalPulls: 0, regularPulls: 0, deluxePulls: 0, wKeyPulls: 0, wins: 0, losses: 0, totalShardsEarned: 0, totalShardsSpent: 0, itemsCrafted: 0, itemsBought: 0, cardsDeleted: 0, cardsUpgraded: 0, favoritedCount: 0, joinedAt: Date.now() };
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────

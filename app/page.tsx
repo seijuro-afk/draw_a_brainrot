@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import cards from "../data/brainrot.json";
 import gameData from "../data/brainrot_game_data.json";
 import { CardStats } from "../lib/types";  
@@ -37,6 +38,7 @@ function initShopStock(): ShopItem[] { return SHOP_CATALOG.map((s) => ({ ...s, s
 const LS_KEYS = ["collection", "items", "shards", "regularPity", "shopStock", "restockAt", "regularCooldown", "userStats"];
 
 export default function Home() {
+  const router = useRouter();
   const [activeTab,      setActiveTab]      = useState<Tab>("packs");
   const [collection,     setCollection]     = useState<OwnedCard[]>([]);
   const [items,          setItems]          = useState<Item[]>([]);
@@ -46,48 +48,128 @@ export default function Home() {
   const [restockAt,      setRestockAt]      = useState<number>(Date.now() + SHOP_RESTOCK_MS);
   const [timeToRestock,  setTimeToRestock]  = useState(SHOP_RESTOCK_MS);
   const [userStats,      setUserStats]      = useState<UserStats>(emptyStats());
+  const [username,       setUsername]       = useState<string>('');
+  const [loading,        setLoading]        = useState(true);
 
   useEffect(() => {
-    const c = localStorage.getItem("collection"); const i = localStorage.getItem("items");
-    const s = localStorage.getItem("shards");     const p = localStorage.getItem("regularPity");
-    const ss= localStorage.getItem("shopStock");  const sr= localStorage.getItem("restockAt");
-    const us= localStorage.getItem("userStats");
-    if (c) setCollection(JSON.parse(c)); if (i) setItems(JSON.parse(i));
-    if (s) setShards(Number(s));         if (p) setRegularPity(Number(p));
-    if (ss) setShopStock(JSON.parse(ss));
-    if (us) setUserStats({ ...emptyStats(), ...JSON.parse(us) });
-    if (sr) {
-      const at = Number(sr);
-      if (at > Date.now()) { setRestockAt(at); }
-      else { const next = Date.now() + SHOP_RESTOCK_MS; const fresh = initShopStock(); setRestockAt(next); setShopStock(fresh); localStorage.setItem("shopStock", JSON.stringify(fresh)); localStorage.setItem("restockAt", String(next)); }
-    } else { const next = Date.now() + SHOP_RESTOCK_MS; setRestockAt(next); localStorage.setItem("restockAt", String(next)); }
-  }, []);
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) {
+      setUsername(savedUsername);
+    } else {
+      router.push('/login');
+      return;
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (username) {
+      loadData();
+    }
+  }, [username]);
+
+  async function loadData() {
+    try {
+      const response = await fetch(`/api/user?username=${username}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCollection(data.collection || []);
+        setItems(data.items || []);
+        setShards(data.shards || 0);
+        setRegularPity(data.regularPity || 0);
+        setShopStock(data.shopStock || initShopStock());
+        setUserStats({ ...emptyStats(), ...data.userStats });
+        if (data.restockAt) {
+          const at = Number(data.restockAt);
+          if (at > Date.now()) {
+            setRestockAt(at);
+          } else {
+            const next = Date.now() + SHOP_RESTOCK_MS;
+            setRestockAt(next);
+            saveData({ restockAt: next, shopStock: initShopStock() });
+          }
+        } else {
+          const next = Date.now() + SHOP_RESTOCK_MS;
+          setRestockAt(next);
+          saveData({ restockAt: next });
+        }
+      } else {
+        // New user, initialize
+        const next = Date.now() + SHOP_RESTOCK_MS;
+        setRestockAt(next);
+        setUserStats(emptyStats(username));
+        saveData({ restockAt: next, userStats: emptyStats(username) });
+      }
+    } catch (error) {
+      console.error('Failed to load data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveData(updates: Partial<{
+    collection: OwnedCard[];
+    items: Item[];
+    shards: number;
+    regularPity: number;
+    shopStock: ShopItem[];
+    restockAt: number;
+    userStats: UserStats;
+  }>) {
+    try {
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          collection,
+          items,
+          shards,
+          regularPity,
+          shopStock,
+          restockAt,
+          userStats,
+          ...updates,
+        }),
+      });
+      if (!response.ok) {
+        console.error('Failed to save data:', response.status, await response.text());
+      }
+    } catch (error) {
+      console.error('Failed to save data:', error);
+    }
+  }
 
   useEffect(() => {
     const iv = setInterval(() => {
       const rem = restockAt - Date.now();
-      if (rem <= 0) { const next = Date.now() + SHOP_RESTOCK_MS; const fresh = initShopStock(); setRestockAt(next); setShopStock(fresh); setTimeToRestock(SHOP_RESTOCK_MS); localStorage.setItem("shopStock", JSON.stringify(fresh)); localStorage.setItem("restockAt", String(next)); }
+      if (rem <= 0) { const next = Date.now() + SHOP_RESTOCK_MS; const fresh = initShopStock(); setRestockAt(next); setShopStock(fresh); setTimeToRestock(SHOP_RESTOCK_MS); saveData({ shopStock: fresh, restockAt: next }); }
       else setTimeToRestock(rem);
     }, 1000);
     return () => clearInterval(iv);
-  }, [restockAt]);
+  }, [restockAt, username]);
 
   // ── Persisted setters ───────────────────────────────────────────────────
-  const saveCollection  = useCallback((c: OwnedCard[]) => { setCollection(c);  localStorage.setItem("collection",  JSON.stringify(c)); }, []);
-  const saveItems       = useCallback((i: Item[])      => { setItems(i);        localStorage.setItem("items",       JSON.stringify(i)); }, []);
-  const saveShards      = useCallback((n: number)      => { setShards(n);       localStorage.setItem("shards",      String(n)); }, []);
-  const saveRegularPity = useCallback((n: number)      => { setRegularPity(n);  localStorage.setItem("regularPity", String(n)); }, []);
-  const saveShopStock   = useCallback((ss: ShopItem[]) => { setShopStock(ss);   localStorage.setItem("shopStock",   JSON.stringify(ss)); }, []);
-  const saveUserStats   = useCallback((us: UserStats)  => { setUserStats(us);   localStorage.setItem("userStats",   JSON.stringify(us)); }, []);
+  const saveCollection  = useCallback((c: OwnedCard[]) => { setCollection(c);  saveData({ collection: c }); }, [username]);
+  const saveItems       = useCallback((i: Item[])      => { setItems(i);        saveData({ items: i }); }, [username]);
+  const saveShards      = useCallback((n: number)      => { setShards(n);       saveData({ shards: n }); }, [username]);
+  const saveRegularPity = useCallback((n: number)      => { setRegularPity(n);  saveData({ regularPity: n }); }, [username]);
+  const saveShopStock   = useCallback((ss: ShopItem[]) => { setShopStock(ss);   saveData({ shopStock: ss }); }, [username]);
+  const saveUserStats   = useCallback((us: UserStats)  => { setUserStats(us);   saveData({ userStats: us }); }, [username]);
   const patchStats      = useCallback((patch: Partial<UserStats>) => {
     setUserStats((prev) => {
       const next = { ...prev, ...patch } as UserStats;
-      localStorage.setItem("userStats", JSON.stringify(next));
+      saveData({ userStats: next });
       return next;
     });
-  }, []);
+  }, [username]);
 
-  // ── Handlers ────────────────────────────────────────────────────────────
+  function handleUpdateUsername(newUsername: string) {
+    const trimmed = newUsername.trim();
+    setUsername(trimmed);
+    localStorage.setItem('username', trimmed);
+    setUserStats(prev => ({ ...prev, username: trimmed }));
+    saveData({ userStats: { ...userStats, username: trimmed } });
+  }
   function handleKeepCards(newCards: OwnedCard[], source: "regular" | "deluxe" | "wkey") {
     saveCollection([...collection, ...newCards]);
     patchStats({
@@ -153,53 +235,63 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex bg-zinc-950 text-white">
-      {/* Sidebar */}
-      <aside className="w-52 shrink-0 flex flex-col border-r border-zinc-800 bg-zinc-950 py-8 px-3 gap-1">
-        <h1 className="text-base font-bold tracking-tight px-3 mb-4">🧠 Brainrot</h1>
-        {NAV_ITEMS.map(({ tab, label, icon }) => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${activeTab === tab ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"}`}>
-            <span style={{ fontSize: 18 }}>{icon}</span>{label}
-          </button>
-        ))}
-        <div className="mt-auto px-3 pt-4 border-t border-zinc-800 space-y-1.5">
-          <div className="flex items-center justify-between"><p className="text-xs text-zinc-600">Shards</p><ShardBadge shards={shards} /></div>
-          <p className="text-xs text-zinc-600">Cards: <span className="text-zinc-400 font-medium">{collection.length}</span></p>
-          <p className="text-xs text-zinc-600">Unique: <span className="text-zinc-400 font-medium">{uniqueCards}</span></p>
-          <p className="text-xs text-zinc-600">Items: <span className="text-zinc-400 font-medium">{items.length}</span></p>
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-zinc-400">Loading...</div>
         </div>
-      </aside>
-
-      {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar — login / signup */}
-        <header className="shrink-0 h-14 border-b border-zinc-800 bg-zinc-950 flex items-center justify-end px-6 gap-2">
-          <button className="px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-300 border border-zinc-700 hover:border-zinc-500 hover:text-white transition-all">
-            Log in
-          </button>
-          <button className="px-4 py-1.5 rounded-lg text-sm font-semibold bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all">
-            Sign up
-          </button>
-        </header>
-
-        {/* Page content */}
-        <main className="flex-1 flex flex-col p-8 overflow-hidden">
-          <div className="w-full max-w-lg mx-auto flex flex-col h-full">
-            <div className="mb-6 shrink-0">
-              <h2 className="text-2xl font-bold tracking-tight">{NAV_ITEMS.find((n) => n.tab === activeTab)?.label}</h2>
+      ) : (
+        <>
+          {/* Sidebar */}
+          <aside className="w-52 shrink-0 flex flex-col border-r border-zinc-800 bg-zinc-950 py-8 px-3 gap-1">
+            <h1 className="text-base font-bold tracking-tight px-3 mb-4">🧠 Brainrot</h1>
+            {NAV_ITEMS.map(({ tab, label, icon }) => (
+              <button key={tab} onClick={() => setActiveTab(tab)} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${activeTab === tab ? "bg-zinc-800 text-white" : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"}`}>
+                <span style={{ fontSize: 18 }}>{icon}</span>{label}
+              </button>
+            ))}
+            <div className="mt-auto px-3 pt-4 border-t border-zinc-800 space-y-1.5">
+              <div className="flex items-center justify-between"><p className="text-xs text-zinc-600">Shards</p><ShardBadge shards={shards} /></div>
+              <p className="text-xs text-zinc-600">Cards: <span className="text-zinc-400 font-medium">{collection.length}</span></p>
+              <p className="text-xs text-zinc-600">Unique: <span className="text-zinc-400 font-medium">{uniqueCards}</span></p>
+              <p className="text-xs text-zinc-600">Items: <span className="text-zinc-400 font-medium">{items.length}</span></p>
             </div>
-            <div className={`flex-1 min-h-0 ${activeTab === "battle" || activeTab === "collection" ? "overflow-hidden" : "overflow-y-auto"}`}>
-              {activeTab === "packs"      && <PacksTab shards={shards} regularPity={regularPity} onKeepCards={handleKeepCards} onSpendShards={handleSpendShards} onRegularPull={saveRegularPity} onUseWKey={handleUseWKey} />}
-              {activeTab === "collection" && <CollectionTab collection={collection} onFavorite={handleFavorite} onDelete={handleDeleteCard} />}
-              {activeTab === "battle"     && <BattleTab collection={collection} items={items} onBattleEnd={handleBattleEnd} onUseItem={handleUseItem} />}
-              {activeTab === "inventory"  && <InventoryTab items={items} shards={shards} />}
-              {activeTab === "crafting"   && <CraftingTab items={items} onCraft={handleCraft} />}
-              {activeTab === "shop"       && <ShopTab items={items} onBuy={handleBuy} shopStock={shopStock} timeToRestock={timeToRestock} />}
-              {activeTab === "refinery"   && <RefineryTab collection={collection} onUpgrade={handleUpgrade} />}
-              {activeTab === "profile"    && <ProfileTab collection={collection} items={items} shards={shards} stats={userStats} onDeleteProfile={handleDeleteProfile} />}
-            </div>
+          </aside>
+
+          {/* Main area */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Top bar — login / signup */}
+            <header className="shrink-0 h-14 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between px-6 gap-2">
+              <div className="text-sm text-zinc-400">
+                Logged in as: <span className="text-zinc-200 font-medium">{username}</span>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { localStorage.removeItem('username'); router.push('/login'); }} className="px-4 py-1.5 rounded-lg text-sm font-medium text-zinc-300 border border-zinc-700 hover:border-zinc-500 hover:text-white transition-all">
+                  Log out
+                </button>
+              </div>
+            </header>
+
+            {/* Page content */}
+            <main className="flex-1 flex flex-col p-8 overflow-hidden">
+              <div className="w-full max-w-lg mx-auto flex flex-col h-full">
+                <div className="mb-6 shrink-0">
+                  <h2 className="text-2xl font-bold tracking-tight">{NAV_ITEMS.find((n) => n.tab === activeTab)?.label}</h2>
+                </div>
+                <div className={`flex-1 min-h-0 ${activeTab === "battle" || activeTab === "collection" ? "overflow-hidden" : "overflow-y-auto"}`}>
+                  {activeTab === "packs"      && <PacksTab shards={shards} regularPity={regularPity} onKeepCards={handleKeepCards} onSpendShards={handleSpendShards} onRegularPull={saveRegularPity} onUseWKey={handleUseWKey} />}
+                  {activeTab === "collection" && <CollectionTab collection={collection} onFavorite={handleFavorite} onDelete={handleDeleteCard} />}
+                  {activeTab === "battle"     && <BattleTab collection={collection} items={items} onBattleEnd={handleBattleEnd} onUseItem={handleUseItem} />}
+                  {activeTab === "inventory"  && <InventoryTab items={items} shards={shards} />}
+                  {activeTab === "crafting"   && <CraftingTab items={items} onCraft={handleCraft} />}
+                  {activeTab === "shop"       && <ShopTab items={items} onBuy={handleBuy} shopStock={shopStock} timeToRestock={timeToRestock} />}
+                  {activeTab === "refinery"   && <RefineryTab collection={collection} onUpgrade={handleUpgrade} />}
+                  {activeTab === "profile"    && <ProfileTab collection={collection} items={items} shards={shards} stats={userStats} onDeleteProfile={handleDeleteProfile} />}
+                </div>
+              </div>
+            </main>
           </div>
-        </main>
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { OwnedCard, RARITY_STYLE, RARITY_BORDER, RARITY_GLOW, CharacterDef } from "@/lib/types";
 import { StarRow, StatBar } from "./shared";
-import gameData from "@/data/brainrot_game_data.json";
+import gameData from "../../data/brainrot_game_data.json";
 import { cardPowerScore } from "@/lib/utils";
 
 const GAME_DATA = (gameData as unknown as { characters: Record<string, CharacterDef> }).characters;

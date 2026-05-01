@@ -1,11 +1,12 @@
-<<<<<<< HEAD
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
+
+const MONGODB_URI_STR = MONGODB_URI;
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -28,7 +29,7 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI_STR, opts).then((mongoose) => {
       return mongoose;
     });
   }
@@ -44,31 +45,3 @@ async function dbConnect() {
 }
 
 export default dbConnect;
-=======
-import { MongoClient, Db } from 'mongodb';
-
-let cachedClient: MongoClient | null = null;
-let cachedDb: Db | null = null;
-
-async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI environment variable is not set');
-  }
-
-  const client = new MongoClient(process.env.MONGODB_URI);
-  await client.connect();
-
-  const db = client.db('brainrot');
-
-  cachedClient = client;
-  cachedDb = db;
-
-  return { client, db };
-}
-
-export default connectToDatabase;
->>>>>>> main

@@ -43,6 +43,33 @@ export type UserStats = {
   favoritedCount: number;
   joinedAt: number;
 };
+
+export type User = {
+  username: string;
+  password: string;
+  collection?: any[];
+  items?: any[];
+  shards: number;
+  regularPity: number;
+  shopStock: any[];
+  restockAt: number;
+  userStats: Omit<UserStats, 'username'>;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type OwnedCardDocument = {
+  userId: string;
+  cardId: string;
+  cardName: string;
+  cardRarity: string;
+  cardImage: string;
+  stats: CardStats;
+  stars: number;
+  obtainedAt: number;
+  favorited: boolean;
+};
+
 export function emptyStats(username?: string): UserStats {
   return { username: username || '', totalPulls: 0, regularPulls: 0, deluxePulls: 0, wKeyPulls: 0, wins: 0, losses: 0, totalShardsEarned: 0, totalShardsSpent: 0, itemsCrafted: 0, itemsBought: 0, cardsDeleted: 0, cardsUpgraded: 0, favoritedCount: 0, joinedAt: Date.now() };
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/lib/hooks';
-import AuthForm from './AuthForm';
+import AuthForm from './components/AuthForm';
 import Home from './GameContainer';
 
 export default function PageWithAuth() {
